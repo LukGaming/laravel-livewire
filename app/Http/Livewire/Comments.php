@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\Comment;
 use Carbon\Carbon;
 use Livewire\Component;
 
@@ -9,32 +10,23 @@ use Livewire\Component;
 class Comments extends Component
 {
     public $newComment;
-    public $comments = array([
-        "body" => "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
-        industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type
-        and
-        scrambled it to make a type specimen book. It has survived not only five centuries, but also the
-        leap into
-        electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the
-        release of
-        Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software
-        like
-        Aldus PageMaker including versions of Lorem Ipsum.",
-        "created_at" => '3 minutes ago',
-        "creator" => "Paulo Antonio"
-
-    ]);
+    public $comments;
     public function render()
     {
         return view('livewire.comments');
     }
     public function AddComment(){
-        if($this->newComment == "" || !$this->newComment){
-            return;
-        }
-        array_unshift($this->comments, ["body" => $this->newComment,
-        "created_at" => Carbon::now()->format('d/m/Y H:m'),
-        "creator" => "Paulo "]);
+        $this->validate(['newComment'=>'required|max:140']);
+        Comment::create(["body"=>$this->newComment, 'user_id'=>1]);
+        $this->comments = Comment::all();
         $this->newComment = "";
+    }
+    public function mount(){
+        $intialcomments = Comment::all();
+        $this->comments = $intialcomments;
+    }
+    public function removeComment(Comment $comment){
+        $comment->delete();
+        $this->comments = Comment::all();
     }
 }
